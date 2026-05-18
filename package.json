@@ -8,7 +8,8 @@
     "ui": "playwright test --ui",
     "headed": "playwright test --headed",
     "debug": "playwright test --debug",
-    "report": "playwright show-report"
+    "report": "playwright show-report",
+    "watch": "nodemon --watch tests --watch playwright.config.ts -e ts,js --exec \"playwright test\""
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
   "packageManager": "pnpm@10.14.0",
   "devDependencies": {
     "@playwright/test": "^1.60.0",
-    "@types/node": "^25.8.0"
+    "@types/node": "^25.8.0",
+    "nodemon": "^3.1.14"
   }
 }

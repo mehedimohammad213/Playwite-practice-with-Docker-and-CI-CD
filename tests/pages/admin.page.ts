@@ -1,13 +1,13 @@
-import type { Page, Locator } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
+import { BasePage } from "./base.page";
 
-export class AdminPage {
-  readonly page: Page;
+export class AdminPage extends BasePage {
   readonly rootLocator: Locator;
   readonly accountButton: Locator;
   readonly logoutText: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.rootLocator = page.locator('[id="__next"]');
     this.accountButton = page.getByRole("button", {
       name: "account of current user",
@@ -21,6 +21,13 @@ export class AdminPage {
       .first();
     await dashboardLink.waitFor({ state: "visible" });
     await dashboardLink.click();
+  }
+
+  async waitForDashboard(): Promise<void> {
+    const dashboardLink = this.rootLocator
+      .getByText("Dashboard", { exact: true })
+      .first();
+    await expect(dashboardLink).toBeVisible();
   }
 
   async navigateTo(navName: string) {

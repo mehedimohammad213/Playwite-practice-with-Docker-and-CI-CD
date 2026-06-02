@@ -1,13 +1,13 @@
 import type { Page } from "@playwright/test";
+import { BasePage } from "./base.page";
 
-export class LoginPage {
-  readonly page: Page;
+export class LoginPage extends BasePage {
   readonly emailInput;
   readonly passwordInput;
   readonly loginButton;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.emailInput = page.getByRole("textbox", {
       name: "Enter email address",
     });
@@ -16,9 +16,7 @@ export class LoginPage {
   }
 
   async goto() {
-    await this.page.goto("https://kto-cms-ecru.vercel.app/", {
-      timeout: 60000,
-    });
+    await super.goto("/");
   }
 
   async login(email: string, password: string) {

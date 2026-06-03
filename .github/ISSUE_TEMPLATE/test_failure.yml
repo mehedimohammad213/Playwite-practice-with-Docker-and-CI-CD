@@ -54,8 +54,5 @@ body:
       label: Triage checklist
       options:
         - label: I checked the public HTML report
-          required: false
         - label: I downloaded traces from CI artifacts
-          required: false
         - label: The failure reproduces locally
-          required: false

@@ -1,4 +1,4 @@
-import { test as base, type Page } from "@playwright/test";
+import { createBdd, test as base } from "playwright-bdd";
 import { AdminPage } from "../pages/admin.page";
 import { LoginPage } from "../pages/login.page";
 
@@ -17,4 +17,5 @@ export const test = base.extend<Fixtures>({
   },
 });
 
+export const { Given, When, Then, Before } = createBdd(test);
 export const expect = test.expect;

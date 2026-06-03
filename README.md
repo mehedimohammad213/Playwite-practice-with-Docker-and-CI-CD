@@ -1,12 +1,13 @@
 # KTO CMS — End-to-End Test Suite
 
-Automated browser tests for the [KTO CMS](https://kto-cms-ecru.vercel.app/) admin application. The suite validates critical user journeys—authentication, navigation across admin sections, and logout—using [Playwright](https://playwright.dev/) with a Page Object Model and typed custom fixtures.
+Automated browser tests for the [KTO CMS](https://kto-cms-ecru.vercel.app/) admin application. The suite validates critical user journeys—authentication, navigation across admin sections, and logout—using [Playwright](https://playwright.dev/) with [Cucumber/Gherkin](https://cucumber.io/) via [playwright-bdd](https://vitalets.github.io/playwright-bdd/), a Page Object Model, and typed custom fixtures.
 
 ## Overview
 
 | Concern | Approach |
 |--------|----------|
 | Test runner | Playwright Test |
+| BDD layer | Cucumber Gherkin via playwright-bdd |
 | Package manager | pnpm |
 | Pattern | Page Object Model + fixture-based dependency injection |
 | Browsers | Chromium, Firefox, WebKit (WebKit excluded for the main flow due to site instability) |
@@ -62,44 +63,49 @@ Environment variables are loaded from `.env` via `dotenv` (see `playwright.confi
 
 ```
 tests/
-├── specs/              # Test scenarios (orchestration only)
-│   └── kto-cms-login.spec.ts
+├── features/           # Gherkin feature files (.feature)
+│   └── kto-cms-login.feature
+├── steps/              # Step definitions mapping Gherkin to page actions
+│   └── kto-cms-login.steps.ts
 ├── pages/              # Page Object Model — locators and page actions
 │   ├── base.page.ts
 │   ├── login.page.ts
 │   └── admin.page.ts
 └── support/
-    ├── fixtures.ts     # Extended test with loginPage / adminPage
+    ├── fixtures.ts     # Extended test with loginPage / adminPage + createBdd()
     └── test-data.ts    # Credentials and navigation labels
 
-playwright.config.ts    # Runner, projects, reporters, retries
+.features-gen/          # Generated Playwright specs (gitignored; run bddgen)
+playwright.config.ts    # Runner, projects, reporters, BDD config
 .github/workflows/      # CI pipeline
 Dockerfile              # Reproducible test execution in containers
 ```
 
 **Design notes**
 
-- **Specs stay thin** — flows are expressed as sequences of page methods; selectors live in page classes.
-- **Fixtures** inject `LoginPage` and `AdminPage` so specs do not construct pages manually.
+- **Features express behavior** — scenarios are written in Gherkin; `bddgen` converts them to Playwright tests before each run.
+- **Steps stay thin** — step definitions delegate to page objects; selectors live in page classes.
+- **Fixtures** inject `LoginPage` and `AdminPage` via `createBdd(test)` so steps do not construct pages manually.
 - **Shared data** (`TEST_USER`, `NAVIGATION`) centralizes copy and routes; credentials come from the environment.
-- **WebKit** is skipped for the primary login spec where the target app behaves inconsistently; Chromium and Firefox remain the source of truth for regressions.
+- **WebKit** is skipped for the primary login scenario where the target app behaves inconsistently; Chromium and Firefox remain the source of truth for regressions.
 
 ## Running Tests
 
 | Command | Purpose |
 |---------|---------|
-| `pnpm test` | Headless run across configured browser projects |
+| `pnpm test` | Generate specs from features, then run headless across browser projects |
+| `pnpm run bddgen` | Regenerate Playwright specs from `.feature` files only |
 | `pnpm run test:headed` | Visible browser (debugging) |
 | `pnpm run test:ui` | Playwright UI mode |
 | `pnpm run test:report` | Open the last HTML report |
 | `pnpm run test:watch` | Re-run on file changes (nodemon) |
 | `pnpm run codegen` | Record selectors against `BASE_URL` |
 
-Run a single project or file when iterating:
+Run a single project or feature when iterating:
 
 ```bash
 pnpm exec playwright test --project=chromium
-pnpm exec playwright test tests/specs/kto-cms-login.spec.ts
+pnpm exec playwright test .features-gen/tests/features/kto-cms-login.feature.spec.js
 ```
 
 ## Continuous Integration
@@ -138,9 +144,12 @@ For flaky failures, prefer `--project=chromium` and headed/UI mode before changi
 1. Add or extend a class under `tests/pages/` with role- or test-id-based locators.
 2. Register new page objects in `tests/support/fixtures.ts` if they should be injected.
 3. Add constants to `test-data.ts` when strings or routes are reused.
-4. Implement the scenario in `tests/specs/` using the custom `test` export from `fixtures.ts`.
+4. Write a `.feature` file under `tests/features/` describing the scenario in Gherkin.
+5. Implement matching steps in `tests/steps/` using `Given`, `When`, and `Then` from `fixtures.ts`.
 
-Keep assertions at the page layer or in specs intentionally—avoid duplicating selectors in spec files.
+Run `pnpm run bddgen` after editing feature files (or use `pnpm test`, which runs it automatically).
+
+Keep assertions at the page layer or in steps intentionally—avoid duplicating selectors in step files.
 
 ## Security
 

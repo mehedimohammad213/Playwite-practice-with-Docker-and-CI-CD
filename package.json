@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "playwright test",
-    "test:e2e": "playwright test",
-    "test:headed": "playwright test --headed",
-    "test:ui": "playwright test --ui",
+    "bddgen": "bddgen",
+    "test": "bddgen && playwright test",
+    "test:e2e": "bddgen && playwright test",
+    "test:headed": "bddgen && playwright test --headed",
+    "test:ui": "bddgen && playwright test --ui",
     "test:report": "playwright show-report",
     "codegen": "playwright codegen",
-    "test:watch": "nodemon --watch tests --watch playwright.config.ts -e ts,js --exec \"pnpm exec playwright test\""
+    "test:watch": "nodemon --watch tests --watch playwright.config.ts -e ts,js,feature --exec \"pnpm test\""
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,7 @@
     "@playwright/test": "^1.60.0",
     "@types/node": "^25.8.0",
     "dotenv": "^17.4.2",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "playwright-bdd": "^9.0.0"
   }
 }

@@ -1,4 +1,4 @@
-# KTO CMS — End-to-End Test Suite
+# End-to-End Test Suite
 
 Automated browser tests for the [KTO CMS](https://kto-cms-ecru.vercel.app/) admin application. The suite validates critical user journeys—authentication, navigation across admin sections, and logout—using [Playwright](https://playwright.dev/) with [Cucumber/Gherkin](https://cucumber.io/) via [playwright-bdd](https://vitalets.github.io/playwright-bdd/), a Page Object Model, and typed custom fixtures.
 
@@ -162,21 +162,6 @@ pnpm exec playwright show-trace test-results/**/trace.zip
 
 Artifacts are kept for **30 days**. Configure repository secrets or variables if CI must use non-default credentials or `BASE_URL` (e.g. staging).
 
-## Issues
-
-### Create an issue manually
-
-Use **Issues → New issue** on GitHub to report bugs, request features, or track test failures.
-
-### Automatic issues on CI failure
-
-When tests fail on a push to `main` or `master`, CI automatically:
-
-1. Creates a GitHub issue labeled `test-failure` and `automated`
-2. Links to the workflow run, public HTML report, and commit
-3. Comments on the existing open `test-failure` issue if one is already open (avoids duplicate issues)
-
-Close the issue manually once the tests pass again.
 
 ## Docker
 

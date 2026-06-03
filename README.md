@@ -114,10 +114,35 @@ The [Playwright workflow](.github/workflows/playwright.yml) runs on push and pul
 
 1. Checkout, Node LTS, `pnpm install`
 2. `playwright install --with-deps`
-3. `pnpm exec playwright test`
-4. Upload `playwright-report/` as a 30-day artifact
+3. `pnpm test` (generates Gherkin specs, then runs Playwright)
+4. Upload artifacts (always, even when tests fail):
+   - **`playwright-report`** — HTML report (download and open `index.html`)
+   - **`test-results`** — traces, screenshots, and videos from failed/retried tests
 
-Configure repository secrets or variables if CI must use non-default credentials or `BASE_URL` (e.g. staging).
+### Download the report from GitHub Actions
+
+1. Open the repo on GitHub and go to the **Actions** tab.
+2. Click the **Playwright Tests** workflow run you want to inspect.
+3. Scroll to the **Artifacts** section at the bottom of the run summary.
+4. Click **`playwright-report`** to download the zip file.
+5. Unzip it and open **`index.html`** in your browser.
+
+Or use the GitHub CLI (replace `RUN_ID` with the run number from the Actions URL):
+
+```bash
+gh run download RUN_ID -n playwright-report -D ./playwright-report
+open ./playwright-report/index.html   # macOS
+xdg-open ./playwright-report/index.html   # Linux
+```
+
+To download traces and screenshots from a failed run:
+
+```bash
+gh run download RUN_ID -n test-results -D ./test-results
+pnpm exec playwright show-trace test-results/**/trace.zip
+```
+
+Artifacts are kept for **30 days**. Configure repository secrets or variables if CI must use non-default credentials or `BASE_URL` (e.g. staging).
 
 ## Docker
 

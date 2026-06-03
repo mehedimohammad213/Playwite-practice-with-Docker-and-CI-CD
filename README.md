@@ -166,13 +166,7 @@ Artifacts are kept for **30 days**. Configure repository secrets or variables if
 
 ### Create an issue manually
 
-Use **Issues → New issue** on GitHub. Templates are available for:
-
-| Template | Use when |
-|----------|----------|
-| **Bug report** | Something is broken in the suite or app under test |
-| **Feature request** | You want new test coverage or tooling |
-| **Test failure report** | A Playwright test failed and you want to track the fix |
+Use **Issues → New issue** on GitHub to report bugs, request features, or track test failures.
 
 ### Automatic issues on CI failure
 

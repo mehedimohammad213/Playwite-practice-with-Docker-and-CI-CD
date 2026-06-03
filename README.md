@@ -119,9 +119,25 @@ The [Playwright workflow](.github/workflows/playwright.yml) runs on push and pul
    - **`playwright-report`** — HTML report (download and open `index.html`)
    - **`test-results`** — traces, screenshots, and videos from failed/retried tests
 
-### Download the report from GitHub Actions
+4. Upload artifacts (always, even when tests fail):
+   - **`playwright-report`** — HTML report (download and open `index.html`)
+   - **`test-results`** — traces, screenshots, and videos from failed/retried tests
+5. On push to `main` / `master`, publish the report to **GitHub Pages** (public, no login)
 
-Each workflow run shows **download buttons** at the top of the job summary:
+### Public report (anyone can view or download)
+
+After each push to `main` or `master`, the latest HTML report is published publicly:
+
+| Link | Purpose |
+|------|---------|
+| [View report](https://mehedimohammad213.github.io/Playwite-practice-with-Docker-and-CI-CD/) | Open the interactive HTML report in a browser |
+| [Download zip](https://mehedimohammad213.github.io/Playwite-practice-with-Docker-and-CI-CD/playwright-report.zip) | Download the full report as a zip file |
+
+No GitHub login is required. These links always show the report from the **most recent** push to `main` / `master`.
+
+### Download from GitHub Actions (maintainers)
+
+Each workflow run also shows download buttons at the top of the job summary (GitHub login required for artifacts):
 
 1. Open the repo on GitHub and go to the **Actions** tab.
 2. Click the **Playwright Tests** workflow run you want to inspect.

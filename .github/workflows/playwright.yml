@@ -4,6 +4,16 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   test:
     timeout-minutes: 60
@@ -21,6 +31,16 @@ jobs:
       run: pnpm test
       env:
         CI: true
+    - name: Prepare public report site
+      if: always()
+      run: |
+        if [ ! -d playwright-report ]; then
+          echo "No playwright-report directory found, skipping public site prep."
+          exit 0
+        fi
+        mkdir -p public
+        cp -r playwright-report/* public/
+        (cd playwright-report && zip -r ../public/playwright-report.zip .)
     - name: Upload Playwright HTML report
       id: playwright-report
       uses: actions/upload-artifact@v4
@@ -39,16 +59,31 @@ jobs:
         path: test-results/
         retention-days: 30
         if-no-files-found: ignore
+    - name: Upload public report for GitHub Pages
+      if: always() && github.event_name == 'push' && hashFiles('public/index.html') != ''
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: public
     - name: Add download buttons to job summary
       if: always()
       run: |
+        PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
         {
           echo "## Test artifacts"
           echo ""
+          if [ "${{ github.event_name }}" = "push" ] && [ -f public/index.html ]; then
+            echo "### Public links (no login required)"
+            echo ""
+            echo "[![View Public Report](https://img.shields.io/badge/View-Public%20Report-2ea44f?style=for-the-badge&logo=playwright&logoColor=white)](${PAGES_URL}/)"
+            echo "[![Download Public Report](https://img.shields.io/badge/Download-Public%20Report-0969da?style=for-the-badge&logo=download&logoColor=white)](${PAGES_URL}/playwright-report.zip)"
+            echo ""
+            echo "Anyone can open or download the latest report from GitHub Pages."
+            echo ""
+          fi
+          echo "### GitHub Actions artifacts (login required)"
+          echo ""
           if [ -n "${{ steps.playwright-report.outputs.artifact-id }}" ]; then
             echo "[![Download Playwright Report](https://img.shields.io/badge/Download-Playwright%20Report-2ea44f?style=for-the-badge&logo=playwright&logoColor=white)](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.playwright-report.outputs.artifact-id }})"
-            echo ""
-            echo "Unzip the downloaded file and open \`index.html\` in your browser."
             echo ""
           fi
           if [ -n "${{ steps.test-results.outputs.artifact-id }}" ]; then
@@ -57,3 +92,15 @@ jobs:
             echo "Contains traces, screenshots, and videos from failed or retried tests."
           fi
         } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-report:
+    needs: test
+    if: github.event_name == 'push' && always() && needs.test.result != 'cancelled'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Deploy public report to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

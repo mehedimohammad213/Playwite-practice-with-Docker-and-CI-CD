@@ -2,11 +2,9 @@
   "name": "test+docler",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "bddgen": "bddgen",
     "test": "bddgen && playwright test",
-    "test:e2e": "bddgen && playwright test",
     "test:headed": "bddgen && playwright test --headed",
     "test:ui": "bddgen && playwright test --ui",
     "test:report": "playwright show-report",

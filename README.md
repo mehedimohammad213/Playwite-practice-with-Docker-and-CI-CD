@@ -121,11 +121,16 @@ The [Playwright workflow](.github/workflows/playwright.yml) runs on push and pul
 
 ### Download the report from GitHub Actions
 
+Each workflow run shows **download buttons** at the top of the job summary:
+
 1. Open the repo on GitHub and go to the **Actions** tab.
 2. Click the **Playwright Tests** workflow run you want to inspect.
-3. Scroll to the **Artifacts** section at the bottom of the run summary.
-4. Click **`playwright-report`** to download the zip file.
-5. Unzip it and open **`index.html`** in your browser.
+3. At the top of the run summary, click **Download Playwright Report** (green button).
+4. Unzip the file and open **`index.html`** in your browser.
+
+If a test failed, use **Download Test Results** (red button) for traces and screenshots.
+
+You can also download from the **Artifacts** table at the bottom of the same page — click **`playwright-report`**.
 
 Or use the GitHub CLI (replace `RUN_ID` with the run number from the Actions URL):
 

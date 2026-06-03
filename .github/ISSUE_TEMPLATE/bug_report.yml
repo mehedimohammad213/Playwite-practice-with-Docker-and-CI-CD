@@ -1,0 +1,74 @@
+name: Bug report
+description: Report a problem with the test suite or the app under test
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Include steps to reproduce and, if possible, a link to a failed CI run or report.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: Short description of the bug
+      placeholder: Login step fails after password entry
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce the issue?
+      placeholder: |
+        1. Run `pnpm test`
+        2. Open the chromium project
+        3. See failure on logout step
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chromium
+        - Firefox
+        - WebKit
+        - All browsers
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: ci-run
+    attributes:
+      label: CI run or report link
+      description: Optional link to a GitHub Actions run or public report
+      placeholder: https://github.com/mehedimohammad213/Playwite-practice-with-Docker-and-CI-CD/actions/runs/123
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: User should reach the dashboard after login
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: Test times out waiting for Dashboard link
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Paste relevant error output or attach screenshots
+      render: shell

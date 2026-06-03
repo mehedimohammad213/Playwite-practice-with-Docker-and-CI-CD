@@ -9,6 +9,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  issues: write
 
 concurrency:
   group: pages
@@ -104,3 +105,90 @@ jobs:
     - name: Deploy public report to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
+
+  create-issue:
+    needs: test
+    if: >-
+      always() &&
+      needs.test.result == 'failure' &&
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+    - name: Create or update GitHub issue for test failure
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+          const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+          const pagesUrl = `https://${owner}.github.io/${repo}/`;
+          const shortSha = context.sha.slice(0, 7);
+          const title = `[CI] Playwright tests failed (run #${context.runNumber})`;
+
+          async function ensureLabel(name, color, description) {
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name });
+            } catch (error) {
+              if (error.status === 404) {
+                await github.rest.issues.createLabel({ owner, repo, name, color, description });
+              }
+            }
+          }
+
+          await ensureLabel('test-failure', 'd73a49', 'Playwright test failure tracked from CI');
+          await ensureLabel('automated', 'ededed', 'Created automatically by GitHub Actions');
+
+          const body = [
+            '## Test failure',
+            '',
+            'Playwright tests failed on `' + context.ref + '`.',
+            '',
+            '| | |',
+            '|---|---|',
+            `| **Workflow run** | [View run #${context.runNumber}](${runUrl}) |`,
+            `| **Public report** | [View report](${pagesUrl}) |`,
+            `| **Download report** | [playwright-report.zip](${pagesUrl}playwright-report.zip) |`,
+            `| **Commit** | \`${shortSha}\` |`,
+            `| **Triggered by** | @${context.actor} |`,
+            '',
+            '### Next steps',
+            '- [ ] Review the [HTML report](' + pagesUrl + ')',
+            '- [ ] Download traces from the workflow artifacts',
+            '- [ ] Fix failing tests and push again',
+          ].join('\n');
+
+          const { data: issues } = await github.rest.issues.listForRepo({
+            owner,
+            repo,
+            labels: 'test-failure',
+            state: 'open',
+          });
+
+          if (issues.length > 0) {
+            const issue = issues[0];
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issue.number,
+              body: [
+                'Tests failed again in run',
+                `[#${context.runNumber}](${runUrl})`,
+                `on \`${shortSha}\` by @${context.actor}.`,
+                '',
+                `[View report](${pagesUrl})`,
+              ].join(' '),
+            });
+            core.info(`Commented on existing issue #${issue.number}`);
+          } else {
+            const { data: issue } = await github.rest.issues.create({
+              owner,
+              repo,
+              title,
+              body,
+              labels: ['test-failure', 'automated'],
+            });
+            core.info(`Created issue #${issue.number}`);
+          }

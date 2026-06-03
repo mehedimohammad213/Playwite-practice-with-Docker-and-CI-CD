@@ -118,11 +118,8 @@ The [Playwright workflow](.github/workflows/playwright.yml) runs on push and pul
 4. Upload artifacts (always, even when tests fail):
    - **`playwright-report`** — HTML report (download and open `index.html`)
    - **`test-results`** — traces, screenshots, and videos from failed/retried tests
-
-4. Upload artifacts (always, even when tests fail):
-   - **`playwright-report`** — HTML report (download and open `index.html`)
-   - **`test-results`** — traces, screenshots, and videos from failed/retried tests
 5. On push to `main` / `master`, publish the report to **GitHub Pages** (public, no login)
+6. On push failure to `main` / `master`, **open or update a GitHub issue** with links to the run and report
 
 ### Public report (anyone can view or download)
 
@@ -164,6 +161,28 @@ pnpm exec playwright show-trace test-results/**/trace.zip
 ```
 
 Artifacts are kept for **30 days**. Configure repository secrets or variables if CI must use non-default credentials or `BASE_URL` (e.g. staging).
+
+## Issues
+
+### Create an issue manually
+
+Use **Issues → New issue** on GitHub. Templates are available for:
+
+| Template | Use when |
+|----------|----------|
+| **Bug report** | Something is broken in the suite or app under test |
+| **Feature request** | You want new test coverage or tooling |
+| **Test failure report** | A Playwright test failed and you want to track the fix |
+
+### Automatic issues on CI failure
+
+When tests fail on a push to `main` or `master`, CI automatically:
+
+1. Creates a GitHub issue labeled `test-failure` and `automated`
+2. Links to the workflow run, public HTML report, and commit
+3. Comments on the existing open `test-failure` issue if one is already open (avoids duplicate issues)
+
+Close the issue manually once the tests pass again.
 
 ## Docker
 

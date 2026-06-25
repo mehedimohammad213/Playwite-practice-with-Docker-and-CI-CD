@@ -7,7 +7,7 @@ import { defineBddConfig } from "playwright-bdd";
  */
 import "dotenv/config";
 
-const testDir = defineBddConfig({
+const bddTestDir = defineBddConfig({
   features: "tests/features/**/*.feature",
   steps: ["tests/steps/**/*.ts", "tests/support/fixtures.ts"],
 });
@@ -16,7 +16,7 @@ const testDir = defineBddConfig({
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir,
+  testDir: bddTestDir,
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -38,6 +38,11 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    {
+      name: "api",
+      testDir: "tests/api",
+    },
+
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },

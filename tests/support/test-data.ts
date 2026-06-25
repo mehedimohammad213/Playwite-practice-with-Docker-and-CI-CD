@@ -3,6 +3,9 @@ import path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
+export const API_BASE_URL =
+  process.env.API_BASE_URL || "https://api.kto.solutions";
+
 export const TEST_USER = {
   email: process.env.TEST_USERNAME || "mmhmasum98@gmail.com",
   password: process.env.TEST_PASSWORD || "123456",

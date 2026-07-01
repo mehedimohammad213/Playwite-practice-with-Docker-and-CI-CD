@@ -8,7 +8,9 @@
     "test:api": "playwright test --project=api",
     "test:headed": "bddgen && playwright test --headed",
     "test:ui": "bddgen && playwright test --ui",
-    "test:report": "playwright show-report",
+    "test:report": "allure generate allure-results -o allure-report --clean && allure open allure-report",
+    "allure:generate": "allure generate allure-results -o allure-report --clean",
+    "allure:open": "allure open allure-report",
     "codegen": "playwright codegen",
     "test:watch": "nodemon --watch tests --watch playwright.config.ts -e ts,js,feature --exec \"pnpm test\"",
     "perf": "k6 run k6/performance-test.js && node k6/report/generate.mjs",
@@ -30,6 +32,8 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@types/node": "^25.8.0",
+    "allure-commandline": "^2.43.0",
+    "allure-playwright": "^3.10.2",
     "dotenv": "^17.4.2",
     "nodemon": "^3.1.14",
     "playwright-bdd": "^9.0.0"

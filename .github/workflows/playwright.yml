@@ -32,23 +32,32 @@ jobs:
       run: pnpm test
       env:
         CI: true
+    - name: Setup Java for Allure
+      if: always()
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "17"
+    - name: Generate Allure report
+      if: always()
+      run: pnpm run allure:generate
     - name: Prepare public report site
       if: always()
       run: |
-        if [ ! -d playwright-report ]; then
-          echo "No playwright-report directory found, skipping public site prep."
+        if [ ! -d allure-report ]; then
+          echo "No allure-report directory found, skipping public site prep."
           exit 0
         fi
         mkdir -p public
-        cp -r playwright-report/* public/
-        (cd playwright-report && zip -r ../public/playwright-report.zip .)
-    - name: Upload Playwright HTML report
-      id: playwright-report
+        cp -r allure-report/* public/
+        (cd allure-report && zip -r ../public/allure-report.zip .)
+    - name: Upload Allure report
+      id: allure-report
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-report
-        path: playwright-report/
+        name: allure-report
+        path: allure-report/
         retention-days: 30
         if-no-files-found: ignore
     - name: Upload test results (traces & screenshots)
@@ -75,16 +84,16 @@ jobs:
           if [ "${{ github.event_name }}" = "push" ] && [ -f public/index.html ]; then
             echo "### Public links (no login required)"
             echo ""
-            echo "[![View Public Report](https://img.shields.io/badge/View-Public%20Report-2ea44f?style=for-the-badge&logo=playwright&logoColor=white)](${PAGES_URL}/)"
-            echo "[![Download Public Report](https://img.shields.io/badge/Download-Public%20Report-0969da?style=for-the-badge&logo=download&logoColor=white)](${PAGES_URL}/playwright-report.zip)"
+            echo "[![View Public Report](https://img.shields.io/badge/View-Public%20Report-2ea44f?style=for-the-badge&logo=allure&logoColor=white)](${PAGES_URL}/)"
+            echo "[![Download Public Report](https://img.shields.io/badge/Download-Public%20Report-0969da?style=for-the-badge&logo=download&logoColor=white)](${PAGES_URL}/allure-report.zip)"
             echo ""
-            echo "Anyone can open or download the latest report from GitHub Pages."
+            echo "Anyone can open or download the latest Allure report from GitHub Pages."
             echo ""
           fi
           echo "### GitHub Actions artifacts (login required)"
           echo ""
-          if [ -n "${{ steps.playwright-report.outputs.artifact-id }}" ]; then
-            echo "[![Download Playwright Report](https://img.shields.io/badge/Download-Playwright%20Report-2ea44f?style=for-the-badge&logo=playwright&logoColor=white)](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.playwright-report.outputs.artifact-id }})"
+          if [ -n "${{ steps.allure-report.outputs.artifact-id }}" ]; then
+            echo "[![Download Allure Report](https://img.shields.io/badge/Download-Allure%20Report-2ea44f?style=for-the-badge&logo=allure&logoColor=white)](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.allure-report.outputs.artifact-id }})"
             echo ""
           fi
           if [ -n "${{ steps.test-results.outputs.artifact-id }}" ]; then
@@ -150,12 +159,12 @@ jobs:
             '|---|---|',
             `| **Workflow run** | [View run #${context.runNumber}](${runUrl}) |`,
             `| **Public report** | [View report](${pagesUrl}) |`,
-            `| **Download report** | [playwright-report.zip](${pagesUrl}playwright-report.zip) |`,
+            `| **Download report** | [allure-report.zip](${pagesUrl}allure-report.zip) |`,
             `| **Commit** | \`${shortSha}\` |`,
             `| **Triggered by** | @${context.actor} |`,
             '',
             '### Next steps',
-            '- [ ] Review the [HTML report](' + pagesUrl + ')',
+            '- [ ] Review the [Allure report](' + pagesUrl + ')',
             '- [ ] Download traces from the workflow artifacts',
             '- [ ] Fix failing tests and push again',
           ].join('\n');

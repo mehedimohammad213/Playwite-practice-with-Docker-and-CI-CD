@@ -57,7 +57,7 @@ Environment variables are loaded from `.env` via `dotenv` (see `playwright.confi
 | `HEADLESS` | Browser headless mode | `true` |
 | `CI` | Set by GitHub Actions; enables `forbidOnly`, retries, and single worker | — |
 
-`playwright.config.ts` sets `baseURL` from `BASE_URL`, enables HTML reporting, traces on first retry, and parallel execution locally (serialized on CI for stability).
+`playwright.config.ts` sets `baseURL` from `BASE_URL`, enables Allure reporting, traces on first retry, and parallel execution locally (serialized on CI for stability).
 
 ## Project Structure
 
@@ -97,7 +97,9 @@ Dockerfile              # Reproducible test execution in containers
 | `pnpm run bddgen` | Regenerate Playwright specs from `.feature` files only |
 | `pnpm run test:headed` | Visible browser (debugging) |
 | `pnpm run test:ui` | Playwright UI mode |
-| `pnpm run test:report` | Open the last HTML report |
+| `pnpm run test:report` | Generate and open the Allure report from the last run |
+| `pnpm run allure:generate` | Build `allure-report/` from `allure-results/` |
+| `pnpm run allure:open` | Open an existing Allure report |
 | `pnpm run test:watch` | Re-run on file changes (nodemon) |
 | `pnpm run codegen` | Record selectors against `BASE_URL` |
 
@@ -116,19 +118,19 @@ The [Playwright workflow](.github/workflows/playwright.yml) runs on push and pul
 2. `playwright install --with-deps`
 3. `pnpm test` (generates Gherkin specs, then runs Playwright)
 4. Upload artifacts (always, even when tests fail):
-   - **`playwright-report`** — HTML report (download and open `index.html`)
+   - **`allure-report`** — Allure HTML report (download and open `index.html`)
    - **`test-results`** — traces, screenshots, and videos from failed/retried tests
 5. On push to `main` / `master`, publish the report to **GitHub Pages** (public, no login)
 6. On push failure to `main` / `master`, **open or update a GitHub issue** with links to the run and report
 
 ### Public report (anyone can view or download)
 
-After each push to `main` or `master`, the latest HTML report is published publicly:
+After each push to `main` or `master`, the latest Allure report is published publicly:
 
 | Link | Purpose |
 |------|---------|
-| [View report](https://mehedimohammad213.github.io/Playwite-practice-with-Docker-and-CI-CD/) | Open the interactive HTML report in a browser |
-| [Download zip](https://mehedimohammad213.github.io/Playwite-practice-with-Docker-and-CI-CD/playwright-report.zip) | Download the full report as a zip file |
+| [View report](https://mehedimohammad213.github.io/Playwite-practice-with-Docker-and-CI-CD/) | Open the interactive Allure report in a browser |
+| [Download zip](https://mehedimohammad213.github.io/Playwite-practice-with-Docker-and-CI-CD/allure-report.zip) | Download the full report as a zip file |
 
 No GitHub login is required. These links always show the report from the **most recent** push to `main` / `master`.
 
@@ -138,19 +140,19 @@ Each workflow run also shows download buttons at the top of the job summary (Git
 
 1. Open the repo on GitHub and go to the **Actions** tab.
 2. Click the **Playwright Tests** workflow run you want to inspect.
-3. At the top of the run summary, click **Download Playwright Report** (green button).
+3. At the top of the run summary, click **Download Allure Report** (green button).
 4. Unzip the file and open **`index.html`** in your browser.
 
 If a test failed, use **Download Test Results** (red button) for traces and screenshots.
 
-You can also download from the **Artifacts** table at the bottom of the same page — click **`playwright-report`**.
+You can also download from the **Artifacts** table at the bottom of the same page — click **`allure-report`**.
 
 Or use the GitHub CLI (replace `RUN_ID` with the run number from the Actions URL):
 
 ```bash
-gh run download RUN_ID -n playwright-report -D ./playwright-report
-open ./playwright-report/index.html   # macOS
-xdg-open ./playwright-report/index.html   # Linux
+gh run download RUN_ID -n allure-report -D ./allure-report
+open ./allure-report/index.html   # macOS
+xdg-open ./allure-report/index.html   # Linux
 ```
 
 To download traces and screenshots from a failed run:
@@ -177,7 +179,7 @@ Pass `-e BASE_URL=...` instead of `--env-file` when you do not want a local `.en
 
 ## Reports and Debugging
 
-- **HTML report** — Generated under `playwright-report/`; open with `pnpm run test:report`.
+- **Allure report** — Raw results in `allure-results/`; generate and open with `pnpm run test:report` (requires Java 17+).
 - **Traces** — Captured on first retry (`trace: on-first-retry`); inspect in [Trace Viewer](https://playwright.dev/docs/trace-viewer).
 - **Artifacts** — `test-results/` and reports are gitignored; CI preserves reports via workflow artifacts.
 
